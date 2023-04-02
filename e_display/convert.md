@@ -1,1 +1,1 @@
-convert eink-tst-1.jpg -dither FloydSteinberg -define dither:diffusion-amount=85% -remap squares.bmp -type truecolor BMP3:output.bmp
+convert eink-tst-1.jpg -dither FloydSteinberg -define dither:diffusion-amount=100% -remap squares.bmp -type truecolor BMP3:output.bmp
