@@ -5,16 +5,21 @@ from wand.image import Image as WandImage
 from wand.api import library
 from wand.color import Color
 from waveshare_epd import epd4in01f
+import threading
 
 app = Flask(__name__)
-
+lock = threading.Lock()
 def show_image(pil_image):
-    epd = epd4in01f.EPD()
-    epd.init()
-    epd.Clear()
-    pil_image = pil_image.rotate(180, expand=True)
-    epd.display(epd.getbuffer(pil_image))
-    epd.sleep()
+    lock.acquire()
+    try:
+        epd = epd4in01f.EPD()
+        epd.init()
+        epd.Clear()
+        pil_image = pil_image.rotate(180, expand=True)
+        epd.display(epd.getbuffer(pil_image))
+        epd.sleep()
+    finally:
+        lock.release()
 
 def convert_image(input_image_data, palette=None):
     if palette is None:
@@ -55,7 +60,8 @@ def process_image():
 
     try:
         converted_image = convert_image(input_image_data)
-        show_image(converted_image)
+        thread = threading.Thread(target=show_image, args=(converted_image,))
+        thread.start()
         return jsonify({'status': 'success'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
